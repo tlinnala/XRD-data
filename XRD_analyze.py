@@ -5,12 +5,11 @@ from scipy.signal import find_peaks_cwt
 from scipy.signal import savgol_filter
 
 window=15
-exp_min=0
-exp_max=1524    # Number of measurement points
-process_data=True
+data_points=1524 # Number of measurement points
+# List of files to be processed
 filenames=["000s","008s","013s","025s","120s","180s","300s"]
 
-# Function to normalize data in an array
+# Function to normalize data in 1D array
 def normdata(data):
     len1 = np.shape(data)[0]
     ndata = np.zeros(len1)
@@ -34,28 +33,42 @@ def data_processing (data,minn,maxn,window):
         nexp1[zf_start:zf_end]= npeak
     return nexp1
 
+x_all=[]
+y_all=[]
+
 # Process files one by one
 for i in range(len(filenames)):
-    filename="/home/tlinnala/work/XRD-data/Br-Cl_phases/XRD/"+filenames[i]+".dat"
-#    filename="./Br-Cl_phases/XRD/"+filenames[i]
+    filename="./Br-Cl_phases/XRD/"+filenames[i]+".dat"
     df=pd.read_csv(filename,sep="\s+",header=None)
+    # Convert data from strings to numbers
     df=df.apply(pd.to_numeric,errors="coerce")
-    # Read data from pandas dataframe
+    # Read x data from pandas dataframe
     x=df.loc[:,0]
     x=x.values
+    x_all.append(x)
+    # Read y data and proces/normalize
     y=df.loc[:,1]
     y=y.values
-    # Process and normalize measurement data
-    if process_data:
-        y=data_processing(y,exp_min,exp_max,window)
-        y=normdata(y)
-    else:
-        y=normdata(y)
+    y_proc=data_processing(y,0,data_points,window)
+    y_proc=normdata(y_proc)
+    y=normdata(y)
+    y_all.append(y_proc)
     # Plot the figure and save
     plt.figure()
-    plt.plot(x,y)
+    plt.plot(x,y,label="Unprocessed data")
+    plt.plot(x,y_proc,label="Processed data")
     plt.xlabel("2theta angle (degrees)")
     plt.ylabel("Intensity")
-    plt.title("XRD-spectrum")
-    savename="/home/tlinnala/work/XRD-data/XRD-spectrum_plots/XRD-spectrum_"+str(filenames[i])+".png"
+    plt.title("XRD spectrum")
+    plt.legend()
+    savename="./XRD_plots/XRD_spectrum_"+str(filenames[i])+".png"
     plt.savefig(savename)
+
+# Plot all processed spectra in the same image
+plt.figure()
+for i in range(len(filenames)):
+    plt.plot(x_all[i],y_all[i])
+plt.xlabel("2theta angle (degrees)")
+plt.ylabel("Intensity")
+plt.title("All processed XRD spectra")
+plt.savefig("./XRD_plots/all_spectra.png")
