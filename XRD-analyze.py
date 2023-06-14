@@ -8,7 +8,7 @@ window=15
 exp_min=0
 exp_max=1524    # Number of measurement points
 process_data=True
-filenames=["000s.dat","008s.dat","013s.dat","025s.dat","120s.dat","180s.dat","300s.dat"]
+filenames=["000s","008s","013s","025s","120s","180s","300s"]
 
 # Function to normalize data in an array
 def normdata(data):
@@ -36,7 +36,7 @@ def data_processing (data,minn,maxn,window):
 
 # Process files one by one
 for i in range(len(filenames)):
-    filename="/home/tlinnala/work/XRD-data/Br-Cl_phases/XRD/"+filenames[i]
+    filename="/home/tlinnala/work/XRD-data/Br-Cl_phases/XRD/"+filenames[i]+".dat"
 #    filename="./Br-Cl_phases/XRD/"+filenames[i]
     df=pd.read_csv(filename,sep="\s+",header=None)
     df=df.apply(pd.to_numeric,errors="coerce")
@@ -57,5 +57,5 @@ for i in range(len(filenames)):
     plt.xlabel("2theta angle (degrees)")
     plt.ylabel("Intensity")
     plt.title("XRD-spectrum")
-    savename="/home/tlinnala/work/XRD-data/XRD-spectrum_"+str(filenames[i])+".png"
+    savename="/home/tlinnala/work/XRD-data/XRD-spectrum_plots/XRD-spectrum_"+str(filenames[i])+".png"
     plt.savefig(savename)
